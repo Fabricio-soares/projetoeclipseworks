@@ -53,3 +53,7 @@ CREATE TABLE HistoricoAlteracoes (
 
 
  
+ Execução pelo docker :
+ 1  -  execute o comenado docker build -t projetoeclipseworks . ( no diretório em que os arquivos fora baixados )
+ 2 - Após a criação de imgem crie o conteiner a partir da imagem gerado com o comando 
+   Ex : docker run -d -p 8080:80 --name nome-do-seu-container projetoeclipseworks
