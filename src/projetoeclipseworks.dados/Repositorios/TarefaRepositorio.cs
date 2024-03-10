@@ -1,46 +1,158 @@
-﻿using projetoeclipseworks.Dados.Entidades;
+﻿using Dapper;
+using Microsoft.Extensions.Configuration;
+using projetoeclipseworks.Dados.Entidades;
 using projetoeclipseworks.Dados.Repositorios;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
+using System.Data.SqlClient;
 
-namespace projetoeclipseworks.Dados.Repositorios
+namespace Tarefaeclipseworks.Dados.Repositorios
 {
     public class TarefaRepositorio : ITarefaRepositorio
     {
-            private readonly IRepository<Tarefa> _repository;
+        private readonly IConfiguration _configuration;
 
-        public TarefaRepositorio(IRepository<Tarefa> repository)
+        public TarefaRepositorio(IConfiguration configure)
         {
-            _repository = repository;
+            _configuration = configure;
         }
-
-        public async Task<IEnumerable<Tarefa>> GetAllEntities()
+        public string GetConnection()
         {
-            return await _repository.GetAllAsync();
-        }
-
-        public async Task<Tarefa> GetEntityById(int id)
-        {
-            return await _repository.GetByIdAsync(id);
+            var connection = _configuration.GetSection("ConnectionStrings").GetSection("TarefaConnection").Value;
+            return connection;
         }
 
         public async Task<Tarefa> CreateEntity(Tarefa entity)
         {
-            return await _repository.AddAsync(entity);
+            var connectionString = this.GetConnection();
+            int count = 0;
+            using (var con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    var query = @"INSERT INTO dbo.Tarefa( Id
+                                                      ,Nome
+                                                      ,Nivel
+                                                      ,Finalizada
+                                                      ,ProjetoId
+                                                      ,UsuarioResponsavelId
+                                                      ,DataConclusao) 
+                                               VALUES( @Id
+                                                      ,@Nome
+                                                      ,@Nivel
+                                                      ,@Finalizada
+                                                      ,@ProjetoId
+                                                      ,@UsuarioResponsavelId
+                                                      ,@DataConclusao); SELECT CAST(SCOPE_IDENTITY() as INT); ";
+                    count = con.Execute(query, entity);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    con.Close();
+                }
+                return entity;
+            }
         }
-
+        public async Task<bool> DeleteEntity(Guid id)
+        {
+            var connectionString = this.GetConnection();
+            var count = 0;
+            using (var con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    var query = "DELETE FROM dbo.Tarefa WHERE Id =" + id;
+                    count = con.Execute(query);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    con.Close();
+                }
+                return count >= 1;
+            }
+        }
         public async Task<Tarefa> UpdateEntity(Tarefa entity)
         {
-            return await _repository.UpdateAsync(entity);
+            var connectionString = this.GetConnection();
+            var count = 0;
+            using (var con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    var query = @"UPDATE Tarefa SET Name = @Nome, 
+                                                    Nivel = @Nivel,
+                                                    Finalizada = @Finalizada 
+                                                    ProjetoId = @ProjetoId 
+                                                    UsuarioResponsavelId = @UsuarioResponsavelId 
+                                                    DataConclusao = @DataConclusao 
+                                                    WHERE TarefaId = " + entity.Id;
+                    count = con.Execute(query, entity);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    con.Close();
+                }
+                return entity;
+            }
         }
-
-        public async Task<bool> DeleteEntity(int id)
+        public async Task<Tarefa> GetEntityById(Guid id)
         {
-            return await _repository.DeleteAsync(id);
+            var connectionString = this.GetConnection();
+            Tarefa Tarefa = new Tarefa();
+            using (var con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    var query = "SELECT * FROM Tarefa WHERE Id =" + id;
+                    Tarefa = con.Query<Tarefa>(query).FirstOrDefault();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    con.Close();
+                }
+                return Tarefa;
+            }
+        }
+        public async Task<IEnumerable<Tarefa>> GetAllEntities()
+        {
+            var connectionString = this.GetConnection();
+            List<Tarefa> Tarefas = new List<Tarefa>();
+            using (var con = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    var query = "SELECT * FROM Tarefa";
+                    Tarefas = con.Query<Tarefa>(query).ToList();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    con.Close();
+                }
+                return Tarefas;
+            }
         }
     }
 

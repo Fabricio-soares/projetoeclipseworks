@@ -7,6 +7,6 @@ namespace projetoeclipseworks.Application.Services.Interfaces
         Task<Projeto> CreateProjeto(Projeto projetoDto);
         Task DeleteProjeto(Guid id);
         Task<Projeto> GetProjeto(Guid id);
-        Task<IList<Projeto>> GetProjetos();
+        Task<IEnumerable<Projeto>> GetProjetos();
     }
 }

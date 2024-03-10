@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using projetoeclipseworks.Application.Services.Interfaces;
 using projetoeclipseworks.Dados.Entidades;
@@ -8,6 +9,7 @@ namespace projetoeclipseworks.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableCors]
     public class ProjetoController : ControllerBase
     {
         private readonly IProjetoService _projetoService;

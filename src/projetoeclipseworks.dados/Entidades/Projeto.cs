@@ -13,12 +13,12 @@ namespace projetoeclipseworks.Dados.Entidades
         public Guid Id { get; set; }
 
         [Required]
-        public string Nome { get; set; }
+        public string? Nome { get; set; }
 
-        public int Nivel { get; set; }
+        public int? Nivel { get; set; }
 
-        public int Status { get; set; }
+        public int? Status { get; set; }
 
-        public ICollection<Tarefa> Tarefas { get; set; }
+        public ICollection<Tarefa>? Tarefas { get; set; }
     }
 }
