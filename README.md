@@ -57,3 +57,14 @@ CREATE TABLE HistoricoAlteracoes (
  1  -  execute o comenado docker build -t projetoeclipseworks . ( no diretório em que os arquivos fora baixados )
  2 - Após a criação de imgem crie o conteiner a partir da imagem gerado com o comando 
    Ex : docker run -d -p 8080:80 --name nome-do-seu-container projetoeclipseworks
+
+
+
+   Melhorias :
+    - Criação de entidades para tratamento de conentarios e históricos ( esses itens não foram implementados )
+    - Deleção logica de projetos e tarefas para rastreamento de demandas
+    - Utilizaçõs de k8s para melhora de monitoramento e e controle de escalonamento se necessário
+    - refatoramento de codigo, removendo duplicãção de linhas e melhorando performace.
+
+    
+  
