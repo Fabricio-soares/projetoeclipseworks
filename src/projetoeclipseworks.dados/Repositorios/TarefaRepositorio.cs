@@ -65,7 +65,7 @@ namespace Tarefaeclipseworks.Dados.Repositorios
                 try
                 {
                     con.Open();
-                    var query = "DELETE FROM dbo.Tarefa WHERE Id =" + id;
+                    var query = $"DELETE FROM dbo.Tarefa WHERE Id = '{id.ToString().ToUpper()}'";
                     count = con.Execute(query);
                 }
                 catch (Exception ex)
@@ -87,14 +87,14 @@ namespace Tarefaeclipseworks.Dados.Repositorios
             {
                 try
                 {
+                    var finalizada = entity.Finalizada == true ? 1 : 0;
                     con.Open();
-                    var query = @"UPDATE Tarefa SET Name = @Nome, 
-                                                    Nivel = @Nivel,
-                                                    Finalizada = @Finalizada 
-                                                    ProjetoId = @ProjetoId 
-                                                    UsuarioResponsavelId = @UsuarioResponsavelId 
-                                                    DataConclusao = @DataConclusao 
-                                                    WHERE TarefaId = " + entity.Id;
+                    var query = @$"UPDATE Tarefa SET Nome = '{entity.Nome}', 
+                                                    Nivel =  {entity.Nivel}, 
+                                                    Finalizada = {finalizada}, 
+                                                    UsuarioResponsavelId =  '{entity.UsuarioResponsavelId}', 
+                                                    DataConclusao = '{entity.DataConclusao}' 
+                                                    WHERE Id = '{entity.Id.ToString().ToUpper()}' ";
                     count = con.Execute(query, entity);
                 }
                 catch (Exception ex)
@@ -117,7 +117,7 @@ namespace Tarefaeclipseworks.Dados.Repositorios
                 try
                 {
                     con.Open();
-                    var query = "SELECT * FROM Tarefa WHERE Id =" + id;
+                    var query = $"SELECT * FROM Tarefa WHERE Id = '{id.ToString().ToUpper()}'";
                     Tarefa = con.Query<Tarefa>(query).FirstOrDefault();
                 }
                 catch (Exception ex)

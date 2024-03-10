@@ -8,10 +8,12 @@ namespace projetoeclipseworks.Application.Services
     public class ProjetoService : IProjetoService
     {
         private readonly IProjetoRepositorio _projetoRepositorio;
+        private readonly ITarefaRepositorio _tarefaRepositorio;
 
-        public ProjetoService(IProjetoRepositorio projetoRepositorio)
+        public ProjetoService(IProjetoRepositorio projetoRepositorio, ITarefaRepositorio tarefaRepositorio)
         {
             _projetoRepositorio = projetoRepositorio;
+            _tarefaRepositorio = tarefaRepositorio;
         }
 
         public async Task<Projeto> CreateProjeto(Projeto projetoDto)
@@ -45,9 +47,13 @@ namespace projetoeclipseworks.Application.Services
             var projeto = await _projetoRepositorio.GetEntityById(id);
             if (projeto != null)
             {
-                if (projeto.Tarefas != null && projeto.Tarefas.Any(t => !t.Finalizada))
+                if (projeto.Tarefas != null  && projeto.Tarefas.Any(t => !t.Finalizada))
                 {
-                    throw new ArgumentNullException("Não é possível excluir um projeto com tarefas pendentes.");
+                    throw new Exception("Não é possível excluir um projeto com tarefas pendentes.");
+                }
+                foreach (var tarefa in projeto.Tarefas)
+                {
+                   await _tarefaRepositorio.DeleteEntity(tarefa.Id);
                 }
                 await _projetoRepositorio.DeleteEntity(projeto.Id);
             }

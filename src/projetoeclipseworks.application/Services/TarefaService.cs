@@ -45,6 +45,7 @@ namespace projetoeclipseworks.Application.Services
                 Nivel = (int)tarefaDto.Nivel,
                 ProjetoId = tarefaDto.ProjetoId,
                 UsuarioResponsavelId = tarefaDto.UsuarioResponsavelId,
+                Finalizada = false,
                 DataConclusao = tarefaDto.DataConclusao
             };
 
@@ -53,6 +54,16 @@ namespace projetoeclipseworks.Application.Services
 
         public async Task<bool> DeleteTarefa(Guid id)
         {
+            var tarefa = await _tarefaRepositorio.GetEntityById(id);
+
+            if (tarefa == null)
+            {
+                throw new ArgumentNullException("Tarefa não encontrado.");
+            }
+            if (!tarefa.Finalizada)
+            {
+                throw new Exception("Não é possivel deletar uma tarefa não finalizada.");
+            }
             return await _tarefaRepositorio.DeleteEntity(id);
         }
 
@@ -78,8 +89,15 @@ namespace projetoeclipseworks.Application.Services
             tarefa.Finalizada = atualizacaoDto.Finalizada;
             tarefa.UsuarioResponsavelId = atualizacaoDto.UsuarioResponsavelId;
             tarefa.DataConclusao = atualizacaoDto.DataConclusao;
+
+            if (tarefa?.Comentarios == null)
+                tarefa.Comentarios = new List<Comentario>();
+            if (tarefa?.HistoricoAlteracoes == null)
+                tarefa.HistoricoAlteracoes = new List<HistoricoAlteracao>();
+
             foreach (var comentario in atualizacaoDto.Comentarios)
             {
+              
                 tarefa.Comentarios.Add(new Comentario { Descricao = comentario, Id = Guid.NewGuid(), IdTarefa = tarefa.Id });
             }
 
@@ -89,6 +107,8 @@ namespace projetoeclipseworks.Application.Services
                 DataAlteracao = DateTime.UtcNow,
                 Alteracao = $"Status atualizado para {(atualizacaoDto.Finalizada ? "finalizada" : "pendente")}"
             });
+
+            await _tarefaRepositorio.UpdateEntity(tarefa);
 
             var projeto = await _projetoRepositorio.GetEntityById(tarefa.ProjetoId);
             if (projeto != null && projeto.Tarefas.All(t => t.Finalizada))

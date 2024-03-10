@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using projetoeclipseworks.Application.Dtos;
+using projetoeclipseworks.Application.Services.Interfaces;
 using System;
 using System.Linq;
 
@@ -11,23 +12,24 @@ namespace projetoeclipseworks.Controllers
     public class RelatorioController : ControllerBase
     {
         private readonly IMapper _mapper;
-
-        public RelatorioController(IMapper mapper)
+        private readonly ITarefaService _tarefaService;
+        public RelatorioController(IMapper mapper, ITarefaService tarefaService)
         {
             _mapper = mapper;
+            _tarefaService = tarefaService;
         }
 
         /// <summary>
         /// Gera o relatório do número médio de tarefas concluídas por usuário nos últimos 30 dias.
         /// </summary>
         [HttpGet("media-tarefas-concluidas-por-usuario")]
-        public IActionResult MediaTarefasConcluidasPorUsuarioNosUltimos30Dias()
+        public async Task<IActionResult> MediaTarefasConcluidasPorUsuarioNosUltimos30Dias()
         {
             var dataLimite = DateTime.UtcNow.AddDays(-30);
             var tarefasConcluidasPorUsuario = new Dictionary<Guid, int>(); // Dicionário para armazenar o número de tarefas concluídas por usuário
 
             // Itera sobre as tarefas e conta quantas tarefas foram concluídas por cada usuário nos últimos 30 dias
-            foreach (var tarefa in DataStore.Tarefas)
+            foreach (var tarefa in await _tarefaService.GetTarefasAsync())
             {
                 if (tarefa.Finalizada && tarefa.DataConclusao >= dataLimite)
                 {

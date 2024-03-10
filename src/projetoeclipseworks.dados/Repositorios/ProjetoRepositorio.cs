@@ -93,7 +93,7 @@ namespace projetoeclipseworks.Dados.Repositorios
         public async Task<Projeto> GetEntityById(Guid id)
         {
             var connectionString = this.GetConnection();
-            Projeto Projeto = new Projeto();
+            Projeto projeto = new Projeto();
             using (var con = new SqlConnection(connectionString))
             {
                 try
@@ -124,12 +124,18 @@ namespace projetoeclipseworks.Dados.Repositorios
                              },
                             splitOn: "ProjetoId");
 
-                    return projetos.GroupBy(p => p.Id).Select(g =>
+                    projeto =  projetos.GroupBy(p => p.Id).Select(g =>
                     {
                         var projeto = g.First();
-                        projeto.Tarefas = g.Select(p => p.Tarefas.Single()).ToList();
+                        projeto.Tarefas = g.Select(p => p.Tarefas.SingleOrDefault()).ToList();
                         return projeto;
                     }).FirstOrDefault();
+
+                    if (projeto?.Tarefas == null || projeto.Tarefas.FirstOrDefault()?.Finalizada == null)
+                        projeto.Tarefas = new List<Tarefa>();
+
+                    return projeto;
+
                 }
                 catch (Exception ex)
                 {
@@ -139,7 +145,6 @@ namespace projetoeclipseworks.Dados.Repositorios
                 {
                     con.Close();
                 }
-                return Projeto;
             }
         }
         public async Task<IEnumerable<Projeto>> GetAllEntities()
@@ -153,7 +158,7 @@ namespace projetoeclipseworks.Dados.Repositorios
                     var result = new List<Projeto>();
                     con.Open();
 
-                    var projetos =  con.Query<Projeto, Tarefa, Projeto>(
+                    var projetosList =  con.Query<Projeto, Tarefa, Projeto>(
                              @"SELECT   
                                         PRO.Id
                                        ,PRO.Nome
@@ -178,12 +183,22 @@ namespace projetoeclipseworks.Dados.Repositorios
                              },
                             splitOn: "ProjetoId").Distinct().ToList();
 
-                    return projetos.GroupBy(p => p.Id).Select(g =>
+                    var resultado = projetosList.GroupBy(p => p.Id).Select(g =>
                     {
                         var projeto = g.First();
-                        projeto.Tarefas = g.Select(p => p.Tarefas.Single()).ToList() ?? new List<Tarefa>();
+                        projeto.Tarefas = g.Select(p => p.Tarefas.SingleOrDefault()).ToList();
                         return projeto;
                     });
+
+                    foreach (var item in resultado)
+                    {
+                        if (item?.Tarefas == null || item.Tarefas.FirstOrDefault()?.Finalizada == null)
+                            item.Tarefas = new List<Tarefa>();
+
+                        Projetos.Add(item);
+                    }
+
+                    return Projetos;
 
                 }
                 catch (Exception ex)
