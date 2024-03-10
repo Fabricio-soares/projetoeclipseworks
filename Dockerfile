@@ -1,9 +1,28 @@
-# Usando a imagem de runtime do .NET Core
-FROM mcr.microsoft.com/dotnet/runtime:6.0 AS base
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER app
 WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
 
-# Copiar os arquivos do seu aplicativo
-COPY bin/Release/net6.0/publish/ .
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["src/projetoeclipseworks.api/projetoeclipseworks.api.csproj", "src/projetoeclipseworks.api/"]
+COPY ["src/projetoeclipseworks.application/projetoeclipseworks.application.csproj", "src/projetoeclipseworks.application/"]
+COPY ["src/projetoeclipseworks.dados/projetoeclipseworks.dados.csproj", "src/projetoeclipseworks.dados/"]
+RUN dotnet restore "./src/projetoeclipseworks.api/projetoeclipseworks.api.csproj"
+COPY . .
+WORKDIR "/src/src/projetoeclipseworks.api"
+RUN dotnet build "./projetoeclipseworks.api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
-# Executar o aplicativo quando o contêiner iniciar
-ENTRYPOINT ["dotnet", "NomeDoSeuApp.dll"]
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./projetoeclipseworks.api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "projetoeclipseworks.api.dll"]
