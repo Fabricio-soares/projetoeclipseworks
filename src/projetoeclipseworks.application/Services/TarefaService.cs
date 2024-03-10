@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
-using projetoeclipseworks.Dtos;
 using projetoeclipseworks.Application.Services.Interfaces;
 using projetoeclipseworks.Dados.Entidades;
-using projetoeclipseworks.Dtos;
-using projetoeclipseworks.Application.Dtos;
 using projetoeclipseworks.Dados.Repositorios;
+using projetoeclipseworks.Dtos;
 
 namespace projetoeclipseworks.Application.Services
 {
@@ -27,17 +25,17 @@ namespace projetoeclipseworks.Application.Services
             var projeto = await _projetoRepositorio.GetEntityById(tarefaDto.ProjetoId);
             if (projeto == null)
             {
-                throw new ArgumentNullException("Projeto não encontrado.");
+                throw new Exception("Projeto não encontrado.");
             }
 
             if (projeto.Tarefas != null && projeto.Tarefas.Count >= 20)
             {
-                throw new ArgumentNullException("Número máximo de tarefas atingido para este projeto.");
+                throw new Exception("Número máximo de tarefas atingido para este projeto.");
             }
 
             if (projeto.Status == (int)Util.Enums.StatusProjeto.Finalizado)
             {
-                throw new ArgumentNullException("Não é possível adicionar tarefas a um projeto finalizado.");
+                throw new Exception("Não é possível adicionar tarefas a um projeto finalizado.");
             }
 
             var tarefaEntity = new Tarefa
@@ -50,13 +48,12 @@ namespace projetoeclipseworks.Application.Services
                 DataConclusao = tarefaDto.DataConclusao
             };
 
-            await _tarefaRepositorio.CreateEntity(tarefaEntity);
-            return tarefa;
+            return await _tarefaRepositorio.CreateEntity(tarefaEntity);
         }
 
-        public async Task DeleteTarefa(Guid id)
+        public async Task<bool> DeleteTarefa(Guid id)
         {
-            await _tarefaRepositorio.DeleteEntity(id);
+            return await _tarefaRepositorio.DeleteEntity(id);
         }
 
         public async Task<Tarefa> GetTarefa(Guid id)
@@ -69,7 +66,7 @@ namespace projetoeclipseworks.Application.Services
             return await _tarefaRepositorio.GetAllEntities();
         }
 
-        public async Task UpdateTarefaStatusAsync(Guid id, AtualizacaoStatusTarefaDto atualizacaoDto)
+        public async Task<Tarefa> UpdateTarefaStatusAsync(Guid id, AtualizacaoStatusTarefaDto atualizacaoDto)
         {
 
             var tarefa = await _tarefaRepositorio.GetEntityById(id);
@@ -99,6 +96,7 @@ namespace projetoeclipseworks.Application.Services
                 projeto.Status = (int)Util.Enums.StatusProjeto.Finalizado;
                 await _projetoRepositorio.UpdateEntity(projeto);
             }
+            return tarefa;
         }
     }
 }

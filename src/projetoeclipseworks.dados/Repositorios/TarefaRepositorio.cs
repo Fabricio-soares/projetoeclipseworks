@@ -16,7 +16,7 @@ namespace Tarefaeclipseworks.Dados.Repositorios
         }
         public string GetConnection()
         {
-            var connection = _configuration.GetSection("ConnectionStrings").GetSection("TarefaConnection").Value;
+            var connection = _configuration.GetSection("ConnectionStrings").GetSection("DefaultConnection").Value;
             return connection;
         }
 

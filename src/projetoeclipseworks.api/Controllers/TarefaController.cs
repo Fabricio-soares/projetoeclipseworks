@@ -31,13 +31,15 @@ namespace projetoeclipseworks.Controllers
         {
             try
             {
-                var tarefa = _tarefaService.CreateTarefaAsync(tarefaDto);
+                var  tarefa = await _tarefaService.CreateTarefaAsync(tarefaDto);
                 return CreatedAtAction(nameof(GetTarefa), new { id = tarefa.Id }, tarefa);
+
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+
         }
 
         /// <summary>
@@ -48,7 +50,7 @@ namespace projetoeclipseworks.Controllers
         {
             try
             {
-                var tarefa = _tarefaService.UpdateTarefaStatusAsync(id,atualizacaoDto);
+                var tarefa = await _tarefaService.UpdateTarefaStatusAsync(id,atualizacaoDto);
                 if (tarefa == null)
                 {
                     return NotFound();
@@ -69,7 +71,7 @@ namespace projetoeclipseworks.Controllers
         {
             try
             {
-                var tarefa = _tarefaService.GetTarefa(id);
+                var tarefa = await _tarefaService.GetTarefa(id);
                 if (tarefa == null)
                 {
                     return NotFound();
@@ -91,7 +93,7 @@ namespace projetoeclipseworks.Controllers
         {
             try
             {
-                var tarefa = _tarefaService.GetTarefasAsync();
+                var tarefa =  await _tarefaService.GetTarefasAsync();
                 if (tarefa == null)
                 {
                     return NotFound();
@@ -113,8 +115,8 @@ namespace projetoeclipseworks.Controllers
         {
             try
             {
-                var tarefa = _tarefaService.DeleteTarefa(id);
-                if (tarefa == null)
+                var tarefaSucesso = await _tarefaService.DeleteTarefa(id);
+                if (!tarefaSucesso)
                 {
                     return NotFound();
                 }

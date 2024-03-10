@@ -19,6 +19,6 @@ namespace projetoeclipseworks.Dados.Entidades
 
         public int? Status { get; set; }
 
-        public ICollection<Tarefa>? Tarefas { get; set; }
+        public ICollection<Tarefa>? Tarefas { get; set; } = new List<Tarefa>();
     }
 }
